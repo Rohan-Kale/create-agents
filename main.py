@@ -3,11 +3,20 @@ import yaml
 
 client = OpenAI(api_key=yaml.safe_load(open("..\\credentials.yml"))["openai"])
 
-input = input("Enter your question here: ")
 
-response = client.responses.create(
-    model="gpt-3.5-turbo",
-    input=input
-)
+def interact_with_ai():
+    inp = input("Enter your question here: ")
+    response = client.responses.create(
+        model="gpt-5-nano",
+        tools=[{"type": "web_search"}],
+        input=inp,
+    )
+    print(response.output_text)
 
-print(response)
+def main():
+    while True:
+        interact_with_ai()
+        if input("Do you want to ask another question? (y/n): ").lower() != 'y':
+            break
+
+main()
