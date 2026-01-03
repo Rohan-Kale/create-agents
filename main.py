@@ -1,6 +1,13 @@
-def main():
-    print("Hello from create-agents!")
+from openai import OpenAI
+import yaml
 
+client = OpenAI(api_key=yaml.safe_load(open("..\\credentials.yml"))["openai"])
 
-if __name__ == "__main__":
-    main()
+input = input("Enter your question here: ")
+
+response = client.responses.create(
+    model="gpt-3.5-turbo",
+    input=input
+)
+
+print(response)
