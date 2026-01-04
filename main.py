@@ -10,15 +10,24 @@ def store_response(question, answer):
         f.write(f"Question: {question}\nAnswer: {answer}\n\n")
 
 def interact_with_ai():
-    inp = input("Enter your question here: ")
+    if not curr_session:
+        inp = input("What tasks do you have to complete today?: ")
+    else:
+        inp = input("What else would you like me to do for you?: ")
     response = client.responses.create(
         model="gpt-5-nano",
         tools=[{"type": "web_search"}],
-        input=str(curr_session) + inp,
+        input=[
+            {
+                "role": "system",
+                "content": "You are an AI assistant that helps the user create daily schedules based on their tasks for the day."
+            },
+            {"role": "user", "content": str(curr_session) + inp},
+        ]
     )
 
     res =response.output_text
-    print(res)
+    print(res + "\n\n")
     curr_session.append((inp, res))
 
 def main():
