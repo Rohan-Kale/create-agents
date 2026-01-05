@@ -8,4 +8,6 @@ dependencies = [
     "langchain[anthropic]>=1.2.0",
     "langchain-openai>=1.1.6",
     "pydantic>=2.12.5",
+    "ijson>=3.4.0.post0",
+    "sqlalchemy>=2.0.45",
 ]

@@ -218,3 +218,7 @@ wheels/
 # Virtual environments
 .venv
 master
+
+agent.db
+agent.db-wal
+agent.db-shm
