@@ -33,6 +33,7 @@ def append_to_memory(DailyScheduleFormat):
     with open("memory.json", "w") as f:
         json.dump(existing_memory, f, indent=2)
 
+
 def interact_with_ai():
     if first_run:
         inp = input("What tasks do you have to complete today?: ")

@@ -1,59 +1,63 @@
-{
-  "day": "Monday, January 5, 2026",
-  "tasks": [
-    "Gym",
-    "Work on projects",
-    "Spend time with family",
-    "Hang out with friends"
-  ],
-  "schedule": [
-    {
-      "time": "6:30 AM - 7:30 AM",
-      "task": "Gym"
-    },
-    {
-      "time": "7:30 AM - 8:15 AM",
-      "task": "Shower & Breakfast"
-    },
-    {
-      "time": "8:15 AM - 11:15 AM",
-      "task": "Work on projects"
-    },
-    {
-      "time": "11:15 AM - 11:30 AM",
-      "task": "Break"
-    },
-    {
-      "time": "11:30 AM - 12:30 PM",
-      "task": "Lunch"
-    },
-    {
-      "time": "12:30 PM - 2:30 PM",
-      "task": "Work on projects"
-    },
-    {
-      "time": "2:30 PM - 3:00 PM",
-      "task": "Break / Short walk"
-    },
-    {
-      "time": "3:00 PM - 5:00 PM",
-      "task": "Spend time with family"
-    },
-    {
-      "time": "5:00 PM - 5:15 PM",
-      "task": "Break"
-    },
-    {
-      "time": "5:15 PM - 7:00 PM",
-      "task": "Hang out with friends"
-    },
-    {
-      "time": "7:00 PM - 8:00 PM",
-      "task": "Dinner / Time with family"
-    },
-    {
-      "time": "8:00 PM - 9:30 PM",
-      "task": "Relax / Personal time"
-    }
-  ]
-}
+[
+  {
+    "day": "Tuesday, January 6, 2026",
+    "tasks": [
+      "Go to church",
+      "Code",
+      "Hang out with family",
+      "Watch a movie",
+      "Lunch",
+      "Breaks"
+    ],
+    "schedule": [
+      {
+        "time": "08:30 AM - 09:00 AM",
+        "task": "Breakfast / morning routine"
+      },
+      {
+        "time": "09:00 AM - 10:30 AM",
+        "task": "Code"
+      },
+      {
+        "time": "10:30 AM - 10:45 AM",
+        "task": "Break"
+      },
+      {
+        "time": "10:45 AM - 12:00 PM",
+        "task": "Go to church"
+      },
+      {
+        "time": "12:00 PM - 12:45 PM",
+        "task": "Lunch"
+      },
+      {
+        "time": "01:00 PM - 02:30 PM",
+        "task": "Hang out with family"
+      },
+      {
+        "time": "02:30 PM - 02:45 PM",
+        "task": "Break"
+      },
+      {
+        "time": "02:45 PM - 04:15 PM",
+        "task": "Code"
+      },
+      {
+        "time": "04:15 PM - 05:00 PM",
+        "task": "Break / Relax"
+      },
+      {
+        "time": "05:00 PM - 07:00 PM",
+        "task": "Watch a movie"
+      },
+      {
+        "time": "07:00 PM - 07:45 PM",
+        "task": "Dinner / Clean up"
+      },
+      {
+        "time": "07:45 PM - 09:00 PM",
+        "task": "Free time / Family time"
+      }
+    ]
+  }
+]
