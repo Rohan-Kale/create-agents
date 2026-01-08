@@ -2,6 +2,7 @@ import sqlite3
 import json
 from datetime import datetime
 from schedule import DailyScheduleFormat
+import os
 
 DB_PATH = "agent.db"
 
@@ -13,8 +14,9 @@ def init_db():
         conn.execute("""
         CREATE TABLE IF NOT EXISTS schedules (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            day TEXT,
+            day TEXT UNIQUE NOT NULL,
             data TEXT NOT NULL,
+            feedback TEXT,
             created_at TEXT NOT NULL
         )
         """)
@@ -50,3 +52,54 @@ def load_old_conversations(limit: int | None = None) -> list[DailyScheduleFormat
             )
 
     return schedules
+
+def load_day(day_str):
+    '''
+    Load the schedule for a specific day.
+    '''
+    print(day_str)
+    with get_connection() as conn:
+        row = conn.execute("SELECT data FROM schedules WHERE day=?", (day_str,)).fetchone()
+        print(row)
+        if row:
+            return DailyScheduleFormat.model_validate(json.loads(row))      
+        return None
+
+def get_summary_for_day(day: str) -> dict | None:
+    '''
+    Get the summary for a specific day.
+    '''
+    schedule = load_day(day)
+    if not schedule:
+        return None
+    completed = [t.name for t in schedule.tasks if t.completed]
+    missed = [t.name for t in schedule.tasks if not t.completed]
+    total = len(schedule.tasks)
+    return {
+        "day": day,
+        "completed": completed,
+        "missed": missed,
+        "total": total,
+        "completion_rate": len(completed) / total if total > 0 else 0
+    }
+
+def load_last_n_days(n: int) -> list[DailyScheduleFormat]:
+    """
+    Load the last n schedules in chronological order.
+    """
+    query = "SELECT data FROM schedules ORDER BY created_at DESC LIMIT ?"
+    schedules = []
+    with get_connection() as conn:
+        for (data,) in conn.execute(query, (n,)):
+            schedules.append(DailyScheduleFormat.model_validate(json.loads(data)))
+    return list(reversed(schedules))  # return oldest first
+
+def save_feedback(day: str, feedback: str):
+    """
+    Attach feedback to a day's schedule.
+    """
+    with get_connection() as conn:
+        conn.execute(
+            "UPDATE schedules SET feedback=? WHERE day=?",
+            (feedback, day)
+        )

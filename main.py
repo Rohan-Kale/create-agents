@@ -1,32 +1,53 @@
 from agents.scheduler import Scheduler
-from memory import init_db, append_to_memory, load_old_conversations
+from memory import init_db, append_to_memory, load_old_conversations, load_day
+from agents.summarizer import SummarizerAgent
+from datetime import date
+
+def mark_tasks(schedule):
+    """
+    Ask user which tasks were completed and which were missed.
+    Returns updated schedule with completion info.
+    """
+    print("\nMark your tasks as completed or missed:")
+    for task in schedule.tasks:
+        response = input(f"Did you complete '{task.name}'? (y/n): ").lower()
+        task.completed = response == "y"
+    return schedule
 
 def main():
     init_db()
-    
-    agent = Scheduler()
+    today_str = date.today().strftime("%A, %B %d, %Y")
 
-    past_memory = load_old_conversations()
+    #check if there is a schedule for today
+    schedule = load_day(today_str)
 
-    first_run = True
+    print(" ---------------SCHEDULE FOR TODAY---------------", schedule)
+    if schedule is None:
+        print("Good morning! Let's create your schedule for today.")
+        user_input = input("Enter the tasks you want to complete today: ")
 
-    while True:
-        if first_run:
-            user_input = input("What tasks do you have to complete today?: ")
-        else:
-            user_input = input("What else would you like me to do for you?: ")
+        # Scheduler agent
+        scheduler = Scheduler()
+        schedule = scheduler.run(user_input, load_old_conversations())
 
-        schedule = agent.run(user_input, past_memory)
-        print("\nGenerated schedule:\n")
-        print(schedule.model_dump_json(indent=2))
-
+        # Store the schedule in memory 
         append_to_memory(schedule)
-        past_memory.append(schedule)
+        print("\nYour schedule for today has been saved:")
+        print(schedule.model_dump_json(indent=2))
+        print("\nYou can come back later to mark completed tasks and receive feedback.")
+    else:
+        print("Welcome back! Let's mark which tasks you completed today.")
 
-        first_run = False
+        schedule = mark_tasks(schedule)
 
-        if input("\nDo you want to ask another question? (y/n): ").lower() != "y":
-            break
+        # Save updated schedule back to memory
+        append_to_memory(schedule)
+
+        # Generate summary
+        summarizer = SummarizerAgent(memory=None)
+        summary_text = summarizer.reflect_on_day(today_str)
+        print("\nDaily Summary & Feedback:\n")
+        print(summary_text)
 
 if __name__ == "__main__":
     main()
