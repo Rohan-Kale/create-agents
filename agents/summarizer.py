@@ -44,4 +44,7 @@ class SummarizerAgent:
 
         summary_text = response.output_text.strip()
 
+        # Save updated schedule back to memory
         save_feedback(day, feedback=summary_text)
+
+        return summary_text

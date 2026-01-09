@@ -17,19 +17,47 @@ def main():
         print("Good morning! Let's create your schedule for today.")
         user_input = input("Enter the tasks you want to complete today: ")
 
-        # Scheduler agent
         scheduler = Scheduler()
-        schedule = scheduler.run(user_input, today_str)
 
-        # Store the schedule in memory 
-        append_to_memory(schedule)
-        print("\nYour schedule for today has been saved:")
-        print(schedule.model_dump_json(indent=2))
-        print("\nYou can come back later to mark completed tasks and receive feedback.")
+        schedule = None
+
+        while True:
+            # Generate or regenerate schedule
+            schedule = scheduler.run(user_input, today_str)
+
+            print("\n📅 Draft schedule:\n")
+            print(schedule.model_dump_json(indent=2))
+
+            print("\nWhat would you like to do?")
+            print("1. Accept and save schedule")
+            print("2. Edit tasks")
+            print("3. Cancel")
+
+            choice = input("Choose an option (1–3): ").strip()
+
+            if choice == "1":
+                append_to_memory(schedule)
+                print("\nSchedule saved successfully!")
+                print("You can come back later to mark completed tasks and receive feedback.")
+                break
+
+            elif choice == "2":
+                user_input = input(
+                    "\nEnter your updated tasks or instructions "
+                    "(e.g., 'shorter gym session', 'no work after 8pm'): "
+                )
+                print("\nUpdating schedule...")
+                continue
+
+            elif choice == "3":
+                print("\nSchedule creation canceled.")
+                schedule = None
+                break
+
+            else:
+                print("Invalid option. Please choose 1–3.")
     else:
         print("Welcome back! Let's mark which tasks you completed today.")
-        # Save updated schedule back to memory
-        append_to_memory(schedule)
 
         # Generate summary
         summarizer = SummarizerAgent()
