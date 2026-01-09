@@ -1,7 +1,6 @@
 from openai import OpenAI
-from schedule import DailyScheduleFormat
+from backend.schemas import DailyScheduleFormat
 import yaml
-from datetime import date
 
 
 class Scheduler:

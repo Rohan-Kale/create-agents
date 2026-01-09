@@ -10,4 +10,5 @@ dependencies = [
     "pydantic>=2.12.5",
     "ijson>=3.4.0.post0",
     "sqlalchemy>=2.0.45",
+    "fastapi>=0.128.0",
 ]

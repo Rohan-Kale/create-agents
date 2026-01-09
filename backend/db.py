@@ -1,7 +1,7 @@
 import sqlite3
 import json
 from datetime import datetime
-from schedule import DailyScheduleFormat
+from backend.schemas import DailyScheduleFormat
 
 conn = sqlite3.connect('schedules.db')
 cursor = conn.cursor()
