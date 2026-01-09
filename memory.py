@@ -22,15 +22,20 @@ def init_db():
         """)
 
 def append_to_memory(schedule: DailyScheduleFormat):
-    with get_connection() as conn:
+    with sqlite3.connect(DB_PATH) as conn:
         conn.execute(
             """
-            INSERT INTO schedules (day, data, created_at)
-            VALUES (?, ?, ?)
+            INSERT INTO schedules (day, data, feedback, created_at)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(day) DO UPDATE SET
+                data=excluded.data,
+                feedback=excluded.feedback,
+                created_at=excluded.created_at
             """,
             (
                 schedule.day,
                 json.dumps(schedule.model_dump()),
+                schedule.feedback if hasattr(schedule, 'feedback') else "",
                 datetime.now().isoformat(),
             )
         )
@@ -57,12 +62,11 @@ def load_day(day_str):
     '''
     Load the schedule for a specific day.
     '''
-    print(day_str)
     with get_connection() as conn:
         row = conn.execute("SELECT data FROM schedules WHERE day=?", (day_str,)).fetchone()
         print(row)
         if row:
-            return DailyScheduleFormat.model_validate(json.loads(row))      
+            return DailyScheduleFormat.model_validate(json.loads(row[0]))      
         return None
 
 def get_summary_for_day(day: str) -> dict | None:
@@ -72,8 +76,8 @@ def get_summary_for_day(day: str) -> dict | None:
     schedule = load_day(day)
     if not schedule:
         return None
-    completed = [t.name for t in schedule.tasks if t.completed]
-    missed = [t.name for t in schedule.tasks if not t.completed]
+    completed = [t for t in schedule.tasks if t.completed]
+    missed = [t for t in schedule.tasks if not t.completed]
     total = len(schedule.tasks)
     return {
         "day": day,

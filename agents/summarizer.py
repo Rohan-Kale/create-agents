@@ -22,15 +22,11 @@ class SummarizerAgent:
         for task in schedule.tasks:
             completed = input(f"Did you complete '{task.name}'? (y/n): ").lower() == "y"
             task.completed = completed
-            liked = input(f"What did you like about '{task.name}'? (optional): ")
-            disliked = input(f"What was challenging or disliked about '{task.name}'? (optional): ")
+            feedback = input(f"What did you like or dislike about '{task.name}'? (optional): ")
             task_feedback[task.name] = {
                 "completed": completed,
-                "liked": liked,
-                "disliked": disliked
+                "feedback": feedback
             }
-        
-        save_feedback(day, feedback="")
 
         # generate summary using LLM
         prompt = f"You are an AI coach. Summarize the user's reflections on their daily tasks,"
@@ -43,8 +39,7 @@ class SummarizerAgent:
             input=[
                 {"role": "system", "content": prompt},
                 {"role": "user", "content": user_input}
-            ],
-            text_format=str
+            ]
         )
 
         summary_text = response.output_text.strip()
