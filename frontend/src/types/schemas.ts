@@ -16,7 +16,6 @@ export interface DailyScheduleFormat {
 }
 
 export interface CompleteTasksRequest {
-    day: string;
     completed_task_ids: number[];
 }
 

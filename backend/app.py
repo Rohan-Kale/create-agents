@@ -1,11 +1,12 @@
 from agents.scheduler import Scheduler
 from agents.summarizer import SummarizerAgent
 from datetime import date
-from memory import init_db, append_to_memory, load_day
+from memory import init_db, append_to_memory, load_day, update_completed_tasks, save_feedback, load_feedback
 from fastapi import FastAPI, HTTPException
 from backend.schemas import (
     DraftRequest, DraftResponse,
     ConfirmRequest, CompleteTasksRequest, ReflectionResponse,
+    DailyScheduleFormat
 )
 
 
@@ -16,34 +17,37 @@ init_db()
 scheduler = Scheduler()
 summarizer = SummarizerAgent()
 
-@app.post("/schedule/draft", response_model=DraftResponse)
+@app.post("/draft", response_model=DraftResponse)
 def draft_schedule(request: DraftRequest):
     schedule = scheduler.run(", ".join(request.tasks), request.day)
     return DraftResponse(schedule=schedule)
 
-@app.post("/schedule/confirm")
+@app.post("/confirm")
 def confirm_schedule(request: ConfirmRequest):
     append_to_memory(request.schedule)
     return {"status": "schedule saved"}
 
-@app.post("/schedule/complete")
-def complete_tasks(request: CompleteTasksRequest):
-    schedule = load_day(request.day)
-    if not schedule:
-        raise HTTPException(status_code=404, detail="No schedule found for this day")
-
-    for task in schedule.tasks:
-        if task.id in request.completed_task_ids:
-            task.completed = True
-
-    append_to_memory(schedule)
-    return {"status": "tasks updated"}
-
-@app.get("/reflect/{day}", response_model=ReflectionResponse)
-def reflect_on_day(day: str):
+@app.get("/schedule/{day}", response_model=DailyScheduleFormat)
+def get_schedule(day: str):
     schedule = load_day(day)
     if not schedule:
-        raise HTTPException(status_code=404, detail="No schedule found for this day")
-    
-    summary = summarizer.reflect_on_day(day)
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    return schedule
+
+@app.post("/complete/{day}", response_model=DailyScheduleFormat)
+def complete_tasks(day: str, req: CompleteTasksRequest):
+    schedule = update_completed_tasks(day, req.completed_task_ids)
+    if not schedule:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+    return schedule
+
+@app.post("/reflect/{day}", response_model=ReflectionResponse)
+def reflect(day: str):
+    schedule = load_day(day)
+    if not schedule:
+        raise HTTPException(status_code=404, detail="Schedule not found")
+
+    summary = summarizer.reflect_on_day(schedule)
+    save_feedback(day, summary)
     return ReflectionResponse(summary=summary)
+

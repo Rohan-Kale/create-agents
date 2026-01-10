@@ -5,8 +5,10 @@ from backend.schemas import DailyScheduleFormat
 
 DB_PATH = "agent.db"
 
+
 def get_connection():
     return sqlite3.connect(DB_PATH)
+
 
 def init_db():
     with get_connection() as conn:
@@ -15,51 +17,40 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             day TEXT UNIQUE NOT NULL,
             data TEXT NOT NULL,
-            feedback TEXT,
             created_at TEXT NOT NULL
         )
         """)
 
+
 def append_to_memory(schedule: DailyScheduleFormat):
-    with sqlite3.connect(DB_PATH) as conn:
+    with get_connection() as conn:
         conn.execute(
             """
-            INSERT INTO schedules (day, data, feedback, created_at)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO schedules (day, data, created_at)
+            VALUES (?, ?, ?)
             ON CONFLICT(day) DO UPDATE SET
-                data=excluded.data,
-                feedback=excluded.feedback,
-                created_at=excluded.created_at
+                data = excluded.data,
+                created_at = excluded.created_at
             """,
             (
                 schedule.day,
                 json.dumps(schedule.model_dump()),
-                schedule.feedback if hasattr(schedule, 'feedback') else "",
                 datetime.now().isoformat(),
             )
         )
 
-def load_day(day_str):
-    '''
-    Load the schedule for a specific day.
-    '''
+
+def load_day(day_str: str) -> DailyScheduleFormat | None:
     with get_connection() as conn:
-        row = conn.execute("SELECT data FROM schedules WHERE day=?", (day_str,)).fetchone()
-        print(row)
+        row = conn.execute(
+            "SELECT data FROM schedules WHERE day=?",
+            (day_str,)
+        ).fetchone()
+
         if row:
-            return DailyScheduleFormat.model_validate(json.loads(row[0]))      
+            return DailyScheduleFormat.model_validate(json.loads(row[0]))
+
         return None
-
-
-def save_feedback(day: str, feedback: str):
-    """
-    Attach feedback to a day's schedule.
-    """
-    with get_connection() as conn:
-        conn.execute(
-            "UPDATE schedules SET feedback=? WHERE day=?",
-            (feedback, day)
-        )
 
 def update_completed_tasks(day: str, completed_ids: list[int]):
     schedule = load_day(day)
@@ -71,3 +62,19 @@ def update_completed_tasks(day: str, completed_ids: list[int]):
 
     append_to_memory(schedule)
     return schedule
+
+def save_feedback(day: str, summary: str):
+    with get_connection() as conn:
+        conn.execute(
+            "UPDATE schedules SET feedback = ? WHERE day = ?",
+            (summary, day)
+        )
+
+def load_feedback(day: str) -> str | None:
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT feedback FROM schedules WHERE day = ?",
+            (day,)
+        ).fetchone()
+
+    return row[0] if row and row[0] else None
